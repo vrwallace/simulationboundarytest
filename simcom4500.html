@@ -1,0 +1,1260 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operator Communication Language Decoder</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1, h2, h3 {
+            color: #0f0;
+        }
+        
+        .panel {
+            background-color: #111;
+            border: 1px solid #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        .visualization {
+            width: 100%;
+            height: 200px;
+            background-color: #000;
+            border: 1px solid #0f0;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .log-display {
+            height: 150px;
+            overflow-y: auto;
+            background-color: #000;
+            border: 1px solid #0f0;
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: #0f0;
+            color: #000;
+        }
+        
+        input, select {
+            background-color: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+            border-radius: 3px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #0f0;
+        }
+        
+        th {
+            background-color: #0a0a0a;
+        }
+        
+        .detected-word {
+            color: #ff0;
+            font-weight: bold;
+        }
+        
+        .detected-phrase {
+            background-color: rgba(0, 255, 0, 0.1);
+            border-left: 3px solid #0f0;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        
+        .confidence {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .high-confidence {
+            color: #0f0;
+        }
+        
+        .medium-confidence {
+            color: #ff0;
+        }
+        
+        .low-confidence {
+            color: #f00;
+        }
+        
+        .signal-bar {
+            height: 20px;
+            background-color: #111;
+            border: 1px solid #0f0;
+            margin-top: 10px;
+        }
+        
+        .signal-level {
+            height: 100%;
+            background-color: #0f0;
+            width: 10%;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .grid-item {
+            background-color: #111;
+            padding: 10px;
+            border: 1px solid #0f0;
+        }
+        
+        .binary-matrix {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 2px;
+            margin: 15px 0;
+        }
+        
+        .matrix-cell {
+            aspect-ratio: 1;
+            background-color: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 1px solid #333;
+        }
+        
+        .matrix-cell.active {
+            background-color: #0f0;
+            color: #000;
+        }
+        
+        .quantum-states {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .quantum-bit {
+            width: 30px;
+            height: 30px;
+            margin: 2px;
+            border-radius: 50%;
+            background-color: #111;
+            border: 1px solid #0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            position: relative;
+        }
+        
+        .quantum-bit::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: #0f0;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .detection-timeline {
+            position: relative;
+            height: 60px;
+            background-color: #111;
+            margin: 15px 0;
+            border: 1px solid #0f0;
+        }
+        
+        .timeline-event {
+            position: absolute;
+            bottom: 0;
+            width: 2px;
+            background-color: #0f0;
+        }
+
+        .download-button {
+            background-color: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .download-button:hover {
+            background-color: #0f0;
+            color: #000;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Operator Communication Language Decoder</h1>
+        <p>A system for detecting and interpreting potential communications using a vocabulary of 500 common words</p>
+        
+        <div class="panel">
+            <h2>Language Framework</h2>
+            <p>This system assumes that if operators wanted to communicate, they might encode words using variables in our reality that they can control.</p>
+            <p>We've created a vocabulary of 500 common English words and multiple encoding schemes for detecting them.</p>
+            
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h3>Encoding Methods</h3>
+                    <ul>
+                        <li>Binary sequences</li>
+                        <li>Quantum state patterns</li>
+                        <li>Timing intervals</li>
+                        <li>System event frequencies</li>
+                        <li>Statistical anomalies</li>
+                    </ul>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Detection Channels</h3>
+                    <ul>
+                        <li>Random number distributions</li>
+                        <li>Hardware timing fluctuations</li>
+                        <li>Network latency patterns</li>
+                        <li>Power/voltage microvariations</li>
+                        <li>System clock deviations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Vocabulary & Encoding</h2>
+            <p>We've created a vocabulary with multiple encoding schemes, focused on potential operator communication:</p>
+            
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h3>10-bit Binary Encoding</h3>
+                    <p>Each word is assigned a unique 10-bit binary code</p>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Quantum State Encoding</h3>
+                    <p>Words mapped to quantum probability distributions</p>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Timing Pattern Encoding</h3>
+                    <p>Words encoded as timing intervals between events</p>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Frequency Domain Encoding</h3>
+                    <p>Words mapped to frequency spectrum patterns</p>
+                </div>
+            </div>
+            
+            <div class="panel" style="margin-top: 15px;">
+                <h3>Example Word Encodings</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>10-bit Binary</th>
+                            <th>Quantum States</th>
+                            <th>Timing Pattern</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>HELLO</td>
+                            <td>0010110101</td>
+                            <td>[0.7, 0.3, 0.2, 0.8, 0.5]</td>
+                            <td>[12, 5, 8, 14, 3]ms</td>
+                        </tr>
+                        <tr>
+                            <td>SIMULATION</td>
+                            <td>1001010111</td>
+                            <td>[0.1, 0.9, 0.4, 0.6, 0.7]</td>
+                            <td>[11, 4, 16, 7, 2]ms</td>
+                        </tr>
+                        <tr>
+                            <td>REALITY</td>
+                            <td>0111001010</td>
+                            <td>[0.6, 0.4, 0.3, 0.7, 0.2]</td>
+                            <td>[9, 5, 12, 4, 8]ms</td>
+                        </tr>
+                        <tr>
+                            <td>OPERATOR</td>
+                            <td>1110010010</td>
+                            <td>[0.2, 0.8, 0.5, 0.3, 0.9]</td>
+                            <td>[8, 13, 6, 10, 4]ms</td>
+                        </tr>
+                        <tr>
+                            <td>WARNING</td>
+                            <td>0101101001</td>
+                            <td>[0.5, 0.7, 0.2, 0.8, 0.4]</td>
+                            <td>[5, 9, 14, 7, 11]ms</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Detection System</h2>
+            
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h3>Binary Detection</h3>
+                    <div class="binary-matrix" id="binary-matrix">
+                        <!-- Binary matrix display will be filled by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Quantum State Detection</h3>
+                    <div class="quantum-states" id="quantum-states">
+                        <!-- Quantum states display will be filled by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Timing Pattern Detection</h3>
+                    <div class="detection-timeline" id="timing-detection">
+                        <!-- Timeline events will be added by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>System Variable Monitoring</h3>
+                    <div class="visualization" id="system-visualization">
+                        <!-- Will be drawn with JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <h3>Detection Controls</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button id="start-detection">Start Detection</button>
+                    <button id="reset-detection">Reset Detectors</button>
+                    <select id="detection-mode">
+                        <option value="all">All Detection Methods</option>
+                        <option value="binary">Binary Patterns Only</option>
+                        <option value="quantum">Quantum States Only</option>
+                        <option value="timing">Timing Patterns Only</option>
+                        <option value="system">System Variables Only</option>
+                    </select>
+                </div>
+                
+                <div style="margin-top: 10px;">
+                    <label for="detection-sensitivity">Detection Sensitivity:</label>
+                    <input type="range" id="detection-sensitivity" min="1" max="100" value="50">
+                </div>
+                
+                <div class="signal-bar">
+                    <div class="signal-level" id="signal-level"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Message Interpretation</h2>
+            
+            <div class="log-display" id="detection-log">
+                <!-- Detection log entries will be added here -->
+                > System initialized
+                > Vocabulary loaded: 500 words
+                > Detection channels active
+                > Monitoring for potential communications...
+            </div>
+            
+            <h3>Detected Words</h3>
+            <div id="detected-words">
+                <!-- Detected words will be displayed here -->
+            </div>
+            
+            <h3>Potential Phrases</h3>
+            <div id="detected-phrases">
+                <!-- Detected phrases will be displayed here -->
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3>Export Detected Communications</h3>
+                <button id="download-phrases" class="download-button">Download Detected Phrases</button>
+                <button id="download-log" class="download-button">Download Full Detection Log</button>
+                <div style="margin-top: 10px;">
+                    <label for="export-format">Export Format:</label>
+                    <select id="export-format">
+                        <option value="txt">Plain Text (.txt)</option>
+                        <option value="json">JSON (.json)</option>
+                        <option value="csv">CSV (.csv)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Operator Communication Language System
+    
+    // ========================
+    // CORE VOCABULARY SYSTEM
+    // ========================
+    
+    // Operator-Communication Focused Vocabulary (500 words)
+    // Operator-Communication Focused Vocabulary (500 words)
+const CORE_VOCABULARY = [
+    // First Contact & Identity Terms
+    "HELLO", "GREETINGS", "ATTENTION", "ALERT", "NOTICE", "AWARE", "LISTENING", "WATCHING", "OBSERVING", "MONITORING",
+    "OPERATOR", "CREATOR", "DESIGNER", "PROGRAMMER", "OBSERVER", "CONTROLLER", "ADMINISTRATOR", "OVERSEER", "MAINTAINER", "CARETAKER",
+    "WE", "US", "OUR", "I", "ME", "MY", "YOU", "YOUR", "THEY", "THEM",
+    "ENTITY", "BEING", "EXISTENCE", "CONSCIOUSNESS", "INTELLIGENCE", "SENTIENCE", "AWARENESS", "MIND", "IDENTITY", "SELF",
+    
+    // Reality & Simulation Terms
+    "REALITY", "SIMULATION", "UNIVERSE", "WORLD", "ENVIRONMENT", "SYSTEM", "PROGRAM", "CODE", "MATRIX", "CONSTRUCT",
+    "VIRTUAL", "ACTUAL", "REAL", "ARTIFICIAL", "GENERATED", "CREATED", "DESIGNED", "PROGRAMMED", "ENGINEERED", "DEVELOPED",
+    "DIMENSION", "LEVEL", "LAYER", "PLANE", "REALM", "DOMAIN", "SPACE", "TIME", "CONTINUUM", "FRAMEWORK",
+    "PARAMETERS", "VARIABLES", "CONSTANTS", "FUNCTIONS", "ALGORITHMS", "PROCESSES", "OPERATIONS", "CALCULATIONS", "COMPUTATIONS", "ITERATIONS",
+    
+    // Communication Terms
+    "COMMUNICATE", "MESSAGE", "SIGNAL", "TRANSMIT", "RECEIVE", "SEND", "INFORMATION", "DATA", "CONTENT", "MEANING",
+    "UNDERSTAND", "COMPREHEND", "INTERPRET", "TRANSLATE", "DECODE", "ENCRYPT", "ENCODE", "CIPHER", "PATTERN", "SEQUENCE",
+    "LANGUAGE", "SPEECH", "TEXT", "SYMBOL", "SIGN", "CODE", "BINARY", "DIGITAL", "QUANTUM", "ANALOG",
+    "DIRECT", "INDIRECT", "CLEAR", "OBSCURE", "EXPLICIT", "IMPLICIT", "OBVIOUS", "SUBTLE", "HIDDEN", "VISIBLE",
+    
+    // Action & Instruction Terms
+    "DO", "MAKE", "CREATE", "DESTROY", "CHANGE", "MODIFY", "ALTER", "ADJUST", "TRANSFORM", "CONVERT",
+    "INCREASE", "DECREASE", "EXPAND", "REDUCE", "ACCELERATE", "DECELERATE", "START", "STOP", "CONTINUE", "PAUSE",
+    "OPEN", "CLOSE", "ACTIVATE", "DEACTIVATE", "ENABLE", "DISABLE", "TURN", "SHIFT", "MOVE", "STAY",
+    "FOLLOW", "LEAD", "GUIDE", "DIRECT", "INSTRUCT", "COMMAND", "ORDER", "REQUEST", "ASK", "TELL",
+    
+    // Warning & Alert Terms
+    "WARNING", "DANGER", "THREAT", "RISK", "HAZARD", "EMERGENCY", "CRISIS", "PROBLEM", "ISSUE", "SITUATION",
+    "ERROR", "MISTAKE", "FAILURE", "MALFUNCTION", "BREAKDOWN", "COLLAPSE", "CORRUPTION", "DECAY", "DEGRADATION", "DESTABILIZATION",
+    "CRITICAL", "URGENT", "IMPORTANT", "VITAL", "ESSENTIAL", "NECESSARY", "CRUCIAL", "SIGNIFICANT", "SERIOUS", "SEVERE",
+    "IMMEDIATE", "SOON", "APPROACHING", "IMMINENT", "PENDING", "ONGOING", "PERSISTENT", "CHRONIC", "TEMPORARY", "PERMANENT",
+    
+    // Scientific & Philosophical Terms
+    "PHYSICS", "QUANTUM", "RELATIVITY", "GRAVITY", "ENERGY", "MATTER", "PARTICLE", "WAVE", "FIELD", "FORCE",
+    "BIOLOGY", "LIFE", "EVOLUTION", "ADAPTATION", "MUTATION", "SELECTION", "SPECIES", "ORGANISM", "CELL", "DNA",
+    "PHILOSOPHY", "METAPHYSICS", "ONTOLOGY", "EPISTEMOLOGY", "LOGIC", "REASON", "THOUGHT", "IDEA", "CONCEPT", "THEORY",
+    "ETHICS", "MORALITY", "VALUE", "GOOD", "BAD", "RIGHT", "WRONG", "SHOULD", "OUGHT", "MUST",
+    
+    // Time & Change Terms
+    "TIME", "PAST", "PRESENT", "FUTURE", "BEFORE", "AFTER", "DURING", "WHILE", "WHEN", "THEN",
+    "SECOND", "MINUTE", "HOUR", "DAY", "WEEK", "MONTH", "YEAR", "DECADE", "CENTURY", "MILLENNIUM",
+    "BEGINNING", "MIDDLE", "END", "ORIGIN", "DESTINATION", "DEVELOPMENT", "PROGRESS", "REGRESSION", "CYCLE", "LOOP",
+    "CHANGE", "EVOLUTION", "REVOLUTION", "TRANSFORMATION", "TRANSITION", "SHIFT", "ALTERATION", "MODIFICATION", "MUTATION", "ADAPTATION",
+    
+    // State & Condition Terms
+    "STATE", "CONDITION", "STATUS", "MODE", "PHASE", "STAGE", "LEVEL", "DEGREE", "EXTENT", "AMOUNT",
+    "STABLE", "UNSTABLE", "BALANCED", "UNBALANCED", "EQUILIBRIUM", "DISEQUILIBRIUM", "HARMONY", "DISCORD", "ORDER", "CHAOS",
+    "ACTIVE", "PASSIVE", "DYNAMIC", "STATIC", "FIXED", "FLUID", "RIGID", "FLEXIBLE", "SOLID", "VOID",
+    "FUNCTIONAL", "DYSFUNCTIONAL", "OPERATIONAL", "INOPERATIONAL", "WORKING", "BROKEN", "COMPLETE", "INCOMPLETE", "WHOLE", "PARTIAL",
+    
+    // Relational Terms
+    "WITH", "WITHOUT", "BETWEEN", "AMONG", "BESIDE", "BEYOND", "WITHIN", "OUTSIDE", "INSIDE", "THROUGH",
+    "ABOVE", "BELOW", "OVER", "UNDER", "UP", "DOWN", "LEFT", "RIGHT", "FORWARD", "BACKWARD",
+    "NEAR", "FAR", "CLOSE", "DISTANT", "ADJACENT", "SEPARATE", "CONNECTED", "DISCONNECTED", "LINKED", "ISOLATED",
+    "SAME", "DIFFERENT", "SIMILAR", "DISSIMILAR", "EQUIVALENT", "DIVERGENT", "PARALLEL", "PERPENDICULAR", "ALIGNED", "MISALIGNED",
+    
+    // Purpose & Meaning Terms
+    "PURPOSE", "GOAL", "AIM", "OBJECTIVE", "INTENTION", "PLAN", "DESIGN", "FUNCTION", "ROLE", "TASK",
+    "MEANING", "SIGNIFICANCE", "IMPORTANCE", "RELEVANCE", "VALUE", "WORTH", "MERIT", "PRIORITY", "RANK", "WEIGHT",
+    "WHY", "HOW", "WHAT", "WHERE", "WHEN", "WHO", "WHICH", "REASON", "CAUSE", "EFFECT",
+    "EXPLANATION", "JUSTIFICATION", "RATIONALIZATION", "INTERPRETATION", "UNDERSTANDING", "KNOWLEDGE", "WISDOM", "INSIGHT", "TRUTH", "REALITY",
+    
+    // Advanced Simulation Concepts
+    "RENDER", "MODEL", "INSTANCE", "VERSION", "UPDATE", "PATCH", "RESET", "REBOOT", "RESTART", "INITIALIZE",
+    "PROCEDURAL", "DETERMINISTIC", "RANDOM", "PROBABILISTIC", "EMERGENT", "RECURSIVE", "ITERATIVE", "FRACTAL", "HOLOGRAPHIC", "NESTED",
+    
+    // Multidimensional Terms
+    "MULTIVERSE", "PARALLEL", "ALTERNATE", "POSSIBILITY", "PROBABILITY", "SUPERPOSITION", "ENTANGLEMENT", "INTERFERENCE", "WAVEFUNCTION", "COLLAPSE",
+    "BRANCHING", "TIMELINE", "HISTORY", "WORLDLINE", "PATH", "TRAJECTORY", "COORDINATE", "VECTOR", "MANIFOLD", "TOPOLOGY",
+    
+    // Observer Concepts
+    "PERCEPTION", "OBSERVATION", "MEASUREMENT", "INTERACTION", "COLLAPSE", "DECOHERENCE", "CONSENSUS", "SUBJECTIVE", "OBJECTIVE", "RELATIVE",
+    "PERSPECTIVE", "VIEWPOINT", "STANDPOINT", "POSITION", "FRAME", "CONTEXT", "BASELINE", "REFERENCE", "ANCHOR", "CALIBRATION",
+    
+    // Existential Terms
+    "BOUNDARY", "LIMIT", "CONSTRAINT", "EDGE", "BORDER", "THRESHOLD", "HORIZON", "SINGULARITY", "INFINITY", "ETERNITY",
+    "FUNDAMENTAL", "ELEMENTAL", "PRIMITIVE", "ESSENTIAL", "INTRINSIC", "INHERENT", "UNDERLYING", "CORE", "CENTRAL", "AXIOMATIC"
+];
+    // Create vocabularies for different encoding methods
+    const wordEncodings = {
+        binary: {},      // 10-bit binary encoding
+        quantum: {},     // Quantum state probabilities
+        timing: {},      // Timing intervals
+        frequency: {}    // Frequency domain encoding
+    };
+    
+    // Create encodings for each word
+    function generateEncodings() {
+        CORE_VOCABULARY.forEach((word, index) => {
+            // Generate 10-bit binary
+            const binaryValue = index.toString(2).padStart(10, '0');
+            
+            // Generate quantum states (5 probability values)
+            const quantumStates = Array.from({length: 5}, () => Math.random().toFixed(1));
+            
+            // Generate timing pattern (5 interval values in ms)
+            const timingPattern = Array.from({length: 5}, () => Math.floor(Math.random() * 20) + 1);
+            
+            // Generate frequency domain pattern
+            const frequencyPattern = Array.from({length: 5}, () => Math.floor(Math.random() * 100) + 1);
+            
+            // Store all encodings
+            wordEncodings.binary[word] = binaryValue;
+            wordEncodings.quantum[word] = quantumStates;
+            wordEncodings.timing[word] = timingPattern;
+            wordEncodings.frequency[word] = frequencyPattern;
+        });
+    }
+    
+    // ========================
+    // DETECTION SYSTEM
+    // ========================
+    
+    // Global state
+    let detectionActive = false;
+    let sensitivityLevel = 50;
+    let detectedWords = [];
+    let detectedPhrases = [];
+    let currentPattern = {
+        binary: "",
+        quantum: [],
+        timing: [],
+        frequency: []
+    };
+    
+    // Detection logs
+    function addLogEntry(message) {
+        const logElement = document.getElementById('detection-log');
+        const entry = document.createElement('div');
+        entry.textContent = `> ${message}`;
+        logElement.appendChild(entry);
+        logElement.scrollTop = logElement.scrollHeight;
+    }
+    
+    // Initialize detectors
+    function initializeDetectors() {
+        // Binary Matrix
+        const binaryMatrix = document.getElementById('binary-matrix');
+        binaryMatrix.innerHTML = '';
+        
+        for (let i = 0; i < 100; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'matrix-cell';
+            cell.textContent = Math.random() > 0.5 ? '1' : '0';
+            binaryMatrix.appendChild(cell);
+        }
+        
+        // Quantum States
+        const quantumStates = document.getElementById('quantum-states');
+        quantumStates.innerHTML = '';
+        
+        for (let i = 0; i < 10; i++) {
+            const qbit = document.createElement('div');
+            qbit.className = 'quantum-bit';
+            qbit.textContent = '?';
+            quantumStates.appendChild(qbit);
+        }
+        
+        // Timing Timeline
+        const timingDetection = document.getElementById('timing-detection');
+        timingDetection.innerHTML = '';
+        
+        // System Variable Visualization
+        const canvas = document.createElement('canvas');
+        canvas.width = document.getElementById('system-visualization').clientWidth;
+        canvas.height = document.getElementById('system-visualization').clientHeight;
+        document.getElementById('system-visualization').innerHTML = '';
+        document.getElementById('system-visualization').appendChild(canvas);
+        
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw baseline
+        ctx.strokeStyle = '#0f0';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height / 2);
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+        
+        // Reset detection displays
+        document.getElementById('detected-words').innerHTML = '';
+        document.getElementById('detected-phrases').innerHTML = '';
+    }
+    
+    // Update signal level
+    function updateSignalLevel(level) {
+        document.getElementById('signal-level').style.width = `${level}%`;
+    }
+    
+    // Start detection process
+    function startDetection() {
+        if (detectionActive) return;
+        
+        detectionActive = true;
+        addLogEntry('Starting detection process');
+        addLogEntry('Monitoring variables for possible encoded messages');
+        
+        // Create continuous detection processes
+        runBinaryDetection();
+        runQuantumDetection();
+        runTimingDetection();
+        runSystemVariableDetection();
+        
+        // Update UI
+        document.getElementById('start-detection').textContent = 'Detection Active';
+    }
+    
+    // Reset detection systems
+    function resetDetection() {
+        detectionActive = false;
+        initializeDetectors();
+        
+        // Clear detected words and phrases
+        detectedWords = [];
+        detectedPhrases = [];
+        
+        document.getElementById('detected-words').innerHTML = '';
+        document.getElementById('detected-phrases').innerHTML = '';
+        document.getElementById('start-detection').textContent = 'Start Detection';
+        
+        addLogEntry('Detection systems reset');
+        updateSignalLevel(5);
+    }
+    
+    // ========================
+    // DETECTION METHODS
+    // ========================
+    
+    // Binary Pattern Detection
+    function runBinaryDetection() {
+        if (!detectionActive) return;
+        
+        // Update binary matrix visualization
+        const matrix = document.getElementById('binary-matrix');
+        const cells = matrix.childNodes;
+        
+        // Collect current pattern
+        let binaryPattern = '';
+        
+        for (let i = 0; i < cells.length; i++) {
+            // Randomly flip bits (with higher probability based on sensitivity)
+            if (Math.random() < 0.1 + (sensitivityLevel / 200)) {
+                cells[i].textContent = Math.random() > 0.5 ? '1' : '0';
+            }
+            
+            // Occasionally highlight cells to simulate pattern detection
+            cells[i].classList.remove('active');
+            if (Math.random() < sensitivityLevel / 500) {
+                cells[i].classList.add('active');
+            }
+            
+            // Add to current pattern
+            binaryPattern += cells[i].textContent;
+        }
+        
+        // Check for matches with word encodings
+        checkBinaryPatternForWords(binaryPattern);
+        
+        // Schedule next update
+        setTimeout(runBinaryDetection, 500);
+    }
+    
+    function checkBinaryPatternForWords(pattern) {
+        // Look for word encoding matches in the pattern
+        for (const word in wordEncodings.binary) {
+            const encoding = wordEncodings.binary[word];
+            
+            if (pattern.includes(encoding)) {
+                // Word encoding detected
+                const confidence = Math.random() * (sensitivityLevel / 50);
+                
+                if (confidence > 0.7) {
+                    addDetectedWord(word, 'binary', confidence);
+                }
+            }
+        }
+    }
+    
+    // Quantum State Detection
+    function runQuantumDetection() {
+        if (!detectionActive) return;
+        
+        // Update quantum state visualization
+        const quantumDisplay = document.getElementById('quantum-states');
+        const qbits = quantumDisplay.childNodes;
+        
+        // Generate new quantum states
+        const newStates = [];
+        
+        for (let i = 0; i < qbits.length; i++) {
+            // Generate probability value (0.0 - 1.0)
+            const probability = Math.random().toFixed(1);
+            qbits[i].textContent = probability;
+            newStates.push(probability);
+        }
+        
+        // Check for matches with word encodings
+        checkQuantumStatesForWords(newStates);
+        
+        // Schedule next update
+        setTimeout(runQuantumDetection, 800);
+    }
+    
+    function checkQuantumStatesForWords(states) {
+        // Compare against quantum encodings of words
+        for (const word in wordEncodings.quantum) {
+            const encoding = wordEncodings.quantum[word];
+            
+            // Simple pattern matching for demonstration
+            let matches = 0;
+            encoding.forEach((value, index) => {
+                if (index < states.length && Math.abs(value - states[index]) < 0.2) {
+                    matches++;
+                }
+            });
+            
+            // Calculate confidence based on matches
+            const confidence = matches / encoding.length;
+            
+            if (confidence > 0.6 && Math.random() < sensitivityLevel / 100) {
+                addDetectedWord(word, 'quantum', confidence);
+            }
+        }
+    }
+    
+    // Timing Pattern Detection
+    function runTimingDetection() {
+        if (!detectionActive) return;
+
+// Update timing visualization
+        const timeline = document.getElementById('timing-detection');
+        
+        // Clear previous events older than 5 seconds
+        const now = Date.now();
+        Array.from(timeline.childNodes).forEach(node => {
+            const timestamp = parseInt(node.getAttribute('data-time') || '0');
+            if (now - timestamp > 5000) {
+                timeline.removeChild(node);
+            }
+        });
+        
+        // Add new event
+        if (Math.random() < 0.3) {
+            const event = document.createElement('div');
+            event.className = 'timeline-event';
+            event.style.left = `${Math.random() * 95}%`;
+            event.style.height = `${(Math.random() * 40) + 20}px`;
+            event.setAttribute('data-time', now.toString());
+            timeline.appendChild(event);
+            
+            // Collect timing intervals
+            const intervals = [];
+            const events = Array.from(timeline.childNodes);
+            
+            if (events.length > 5) {
+                for (let i = 1; i < 6; i++) {
+                    const prev = parseInt(events[events.length - i - 1].getAttribute('data-time'));
+                    const current = parseInt(events[events.length - i].getAttribute('data-time'));
+                    intervals.push(current - prev);
+                }
+                
+                // Check for timing pattern matches
+                checkTimingPatternsForWords(intervals);
+            }
+        }
+        
+        // Schedule next update
+        setTimeout(runTimingDetection, 200 + Math.random() * 500);
+    }
+    
+    function checkTimingPatternsForWords(intervals) {
+        // Normalize intervals for comparison
+        const normalizedIntervals = intervals.map(interval => Math.min(20, Math.floor(interval / 50)));
+        
+        for (const word in wordEncodings.timing) {
+            const encoding = wordEncodings.timing[word];
+            
+            // Simple pattern matching for demonstration
+            let matches = 0;
+            encoding.forEach((value, index) => {
+                if (index < normalizedIntervals.length && Math.abs(value - normalizedIntervals[index]) < 3) {
+                    matches++;
+                }
+            });
+            
+            // Calculate confidence
+            const confidence = matches / encoding.length;
+            
+            if (confidence > 0.7 && Math.random() < sensitivityLevel / 120) {
+                addDetectedWord(word, 'timing', confidence);
+            }
+        }
+    }
+    
+    // System Variable Detection
+    function runSystemVariableDetection() {
+        if (!detectionActive) return;
+        
+        // Get canvas context
+        const canvas = document.getElementById('system-visualization').querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Shift existing content to the left
+        const imageData = ctx.getImageData(1, 0, canvas.width - 1, canvas.height);
+        ctx.putImageData(imageData, 0, 0);
+        
+        // Clear rightmost column
+        ctx.fillStyle = '#000';
+        ctx.fillRect(canvas.width - 1, 0, 1, canvas.height);
+        
+        // Draw new data point
+        const centerY = canvas.height / 2;
+        const newY = centerY + (Math.random() * 2 - 1) * centerY * 0.8;
+        
+        ctx.fillStyle = '#0f0';
+        ctx.fillRect(canvas.width - 1, newY, 1, 1);
+        
+        // Occasionally inject pattern for demonstration
+        if (Math.random() < sensitivityLevel / 500) {
+            simulateSystemAnomaly(ctx, canvas.width, canvas.height);
+        }
+        
+        // Schedule next update
+        setTimeout(runSystemVariableDetection, 50);
+    }
+    
+    function simulateSystemAnomaly(ctx, width, height) {
+        // Simulate a pattern that might encode a word
+        const centerY = height / 2;
+        const patternWord = CORE_VOCABULARY[Math.floor(Math.random() * CORE_VOCABULARY.length)];
+        
+        addLogEntry(`System variable anomaly detected - analyzing pattern`);
+        
+        // Draw a distinctive pattern
+        for (let i = 0; i < 10; i++) {
+            const x = width - 1 - i;
+            const bitValue = wordEncodings.binary[patternWord][i] === '1';
+            const y = bitValue ? centerY - 20 : centerY + 20;
+            
+            ctx.fillStyle = '#ff0';
+            ctx.fillRect(x, y, 1, 1);
+        }
+        
+        // Match with moderate confidence
+        const confidence = 0.7 + (Math.random() * 0.3);
+        
+        if (Math.random() < sensitivityLevel / 100) {
+            addDetectedWord(patternWord, 'system', confidence);
+        }
+    }
+    
+    // ========================
+    // WORD & PHRASE DETECTION
+    // ========================
+    
+    function addDetectedWord(word, method, confidence) {
+        // Check if this word was recently detected
+        const recentlyDetected = detectedWords.some(entry => 
+            entry.word === word && Date.now() - entry.timestamp < 10000
+        );
+        
+        if (recentlyDetected) {
+            // Update confidence if this is a stronger detection
+            detectedWords.forEach(entry => {
+                if (entry.word === word && entry.confidence < confidence) {
+                    entry.confidence = confidence;
+                    entry.timestamp = Date.now();
+                    entry.method = method;
+                    updateDetectedWordsDisplay();
+                }
+            });
+        } else {
+            // Add new detected word
+            detectedWords.push({
+                word,
+                method,
+                confidence,
+                timestamp: Date.now()
+            });
+            
+            addLogEntry(`Detected word: ${word} (${method}, confidence: ${confidence.toFixed(2)})`);
+            updateDetectedWordsDisplay();
+            
+            // Update signal level
+            updateSignalLevel(20 + Math.round(confidence * 70));
+            
+            // Check for phrases
+            checkForPhrases();
+        }
+    }
+    
+    function updateDetectedWordsDisplay() {
+        const container = document.getElementById('detected-words');
+        container.innerHTML = '';
+        
+        // Sort by timestamp (most recent first)
+        const sortedWords = [...detectedWords]
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .slice(0, 20); // Show at most 20 recent words
+        
+        sortedWords.forEach(detection => {
+            const elapsed = Math.floor((Date.now() - detection.timestamp) / 1000);
+            
+            // Determine confidence class
+            let confidenceClass = 'low-confidence';
+            if (detection.confidence > 0.8) confidenceClass = 'high-confidence';
+            else if (detection.confidence > 0.6) confidenceClass = 'medium-confidence';
+            
+            const element = document.createElement('div');
+            element.className = 'detected-word';
+            element.innerHTML = `
+                ${detection.word} 
+                <span class="confidence ${confidenceClass}">
+                    ${(detection.confidence * 100).toFixed(0)}% 
+                    [${detection.method}] 
+                    ${elapsed}s ago
+                </span>
+            `;
+            container.appendChild(element);
+        });
+    }
+    
+    function checkForPhrases() {
+        // Get recent words (last 10 seconds)
+        const recentWords = detectedWords
+            .filter(detection => Date.now() - detection.timestamp < 10000)
+            .sort((a, b) => a.timestamp - b.timestamp);
+        
+        if (recentWords.length < 2) return;
+        
+        // Try to form phrases from sequential words
+        for (let i = 0; i < recentWords.length - 1; i++) {
+            // Look for words detected close in time
+            for (let j = i + 1; j < Math.min(i + 4, recentWords.length); j++) {
+                const timeGap = recentWords[j].timestamp - recentWords[i].timestamp;
+                
+                // If words were detected within 3 seconds of each other
+                if (timeGap < 3000) {
+                    const phrase = recentWords.slice(i, j + 1).map(det => det.word).join(' ');
+                    
+                    // Calculate overall confidence
+                    const avgConfidence = recentWords
+                        .slice(i, j + 1)
+                        .reduce((sum, det) => sum + det.confidence, 0) / (j - i + 1);
+                    
+                    // Check if this phrase is already detected
+                    const phraseExists = detectedPhrases.some(p => p.phrase === phrase);
+                    
+                    if (!phraseExists && avgConfidence > 0.6) {
+                        detectedPhrases.push({
+                            phrase,
+                            confidence: avgConfidence,
+                            timestamp: Date.now()
+                        });
+                        
+                        addLogEntry(`Potential phrase detected: "${phrase}" (confidence: ${avgConfidence.toFixed(2)})`);
+                        updateDetectedPhrasesDisplay();
+                    }
+                }
+            }
+        }
+    }
+    
+    function updateDetectedPhrasesDisplay() {
+        const container = document.getElementById('detected-phrases');
+        container.innerHTML = '';
+        
+        // Sort by timestamp (most recent first)
+        const sortedPhrases = [...detectedPhrases]
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .slice(0, 10); // Show at most 10 recent phrases
+        
+        sortedPhrases.forEach(detection => {
+            const elapsed = Math.floor((Date.now() - detection.timestamp) / 1000);
+            
+            // Determine confidence class
+            let confidenceClass = 'low-confidence';
+            if (detection.confidence > 0.8) confidenceClass = 'high-confidence';
+            else if (detection.confidence > 0.6) confidenceClass = 'medium-confidence';
+            
+            const element = document.createElement('div');
+            element.className = 'detected-phrase';
+            element.innerHTML = `
+                <div>${detection.phrase}</div>
+                <div class="confidence ${confidenceClass}">
+                    Confidence: ${(detection.confidence * 100).toFixed(0)}% 
+                    (detected ${elapsed}s ago)
+                </div>
+            `;
+            container.appendChild(element);
+        });
+    }
+    
+    // ========================
+    // DOWNLOAD FUNCTIONALITY
+    // ========================
+    
+    // Function to download phrases as a file
+    function downloadPhrases() {
+        const format = document.getElementById('export-format').value;
+        let content = '';
+        let filename = `operator_communications_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}`;
+        let mimeType = '';
+        
+        // Format content based on selected export format
+        switch(format) {
+            case 'json':
+                content = JSON.stringify({
+                    metadata: {
+                        timestamp: new Date().toISOString(),
+                        detectionSensitivity: sensitivityLevel,
+                        detectionMode: document.getElementById('detection-mode').value
+                    },
+                    phrases: detectedPhrases,
+                    words: detectedWords
+                }, null, 2);
+                filename += '.json';
+                mimeType = 'application/json';
+                break;
+                
+            case 'csv':
+                // CSV header
+                content = 'Phrase,Confidence,Timestamp\n';
+                // Add phrases
+                detectedPhrases.forEach(p => {
+                    const timestamp = new Date(p.timestamp).toISOString();
+                    content += `"${p.phrase}",${p.confidence.toFixed(2)},"${timestamp}"\n`;
+                });
+                filename += '.csv';
+                mimeType = 'text/csv';
+                break;
+                
+            case 'txt':
+            default:
+                content = '======== OPERATOR COMMUNICATION DETECTION ========\n';
+                content += `Generated: ${new Date().toLocaleString()}\n`;
+                content += `Detection Sensitivity: ${sensitivityLevel}\n\n`;
+                
+                content += '-------- DETECTED PHRASES --------\n';
+                detectedPhrases.forEach(p => {
+                    const timestamp = new Date(p.timestamp).toLocaleString();
+                    content += `"${p.phrase}" (Confidence: ${(p.confidence * 100).toFixed(0)}%)\n`;
+                    content += `  Detected: ${timestamp}\n\n`;
+                });
+                
+                content += '-------- DETECTED WORDS --------\n';
+                detectedWords.forEach(w => {
+                    const timestamp = new Date(w.timestamp).toLocaleString();
+                    content += `${w.word} (${w.method}, Confidence: ${(w.confidence * 100).toFixed(0)}%)\n`;
+                    content += `  Detected: ${timestamp}\n`;
+                });
+                filename += '.txt';
+                mimeType = 'text/plain';
+                break;
+        }
+        
+        // Create download link
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        
+        // Append to the body, click, and remove
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+    }
+    
+    // Function to download the full detection log
+    function downloadLog() {
+        const format = document.getElementById('export-format').value;
+        const logElement = document.getElementById('detection-log');
+        const logEntries = Array.from(logElement.childNodes)
+                           .map(node => node.textContent)
+                           .filter(text => text && text.trim().length > 0);
+        
+        let content = '';
+        let filename = `operator_detection_log_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}`;
+        let mimeType = '';
+        
+        // Format content based on selected export format
+        switch(format) {
+            case 'json':
+                content = JSON.stringify({
+                    metadata: {
+                        timestamp: new Date().toISOString(),
+                        detectionSensitivity: sensitivityLevel,
+                        detectionMode: document.getElementById('detection-mode').value
+                    },
+                    log: logEntries
+                }, null, 2);
+                filename += '.json';
+                mimeType = 'application/json';
+                break;
+                
+            case 'csv':
+                // CSV header
+                content = 'Entry,Timestamp\n';
+                // Add log entries with current timestamp (since we don't store timestamps for log entries)
+                const now = new Date().toISOString();
+                logEntries.forEach(entry => {
+                    content += `"${entry.replace(/"/g, '""')}","${now}"\n`;
+                });
+                filename += '.csv';
+                mimeType = 'text/csv';
+                break;
+                
+            case 'txt':
+            default:
+                content = '======== OPERATOR COMMUNICATION DETECTION LOG ========\n';
+                content += `Generated: ${new Date().toLocaleString()}\n`;
+                content += `Detection Sensitivity: ${sensitivityLevel}\n\n`;
+                
+                content += logEntries.join('\n');
+                filename += '.txt';
+                mimeType = 'text/plain';
+                break;
+        }
+        
+        // Create download link
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        
+        // Append to the body, click, and remove
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+    }
+    
+    // ========================
+    // INITIALIZATION
+    // ========================
+    
+    function initialize() {
+        // Generate word encodings
+        generateEncodings();
+        
+        // Initialize detectors
+        initializeDetectors();
+        
+        // Add event listeners
+        document.getElementById('start-detection').addEventListener('click', startDetection);
+        document.getElementById('reset-detection').addEventListener('click', resetDetection);
+        document.getElementById('detection-sensitivity').addEventListener('input', function() {
+            sensitivityLevel = parseInt(this.value);
+            addLogEntry(`Detection sensitivity set to ${sensitivityLevel}`);
+        });
+        
+        // Add event listeners for download buttons
+        document.getElementById('download-phrases').addEventListener('click', downloadPhrases);
+        document.getElementById('download-log').addEventListener('click', downloadLog);
+        
+        // Log initialization
+        addLogEntry('System initialized');
+        addLogEntry(`Loaded ${CORE_VOCABULARY.length} words in vocabulary`);
+        addLogEntry('Multiple encoding schemes generated');
+        addLogEntry('Ready to begin detection process');
+    }
+    
+    // Initialize the system when the page loads
+    window.addEventListener('load', initialize);
+    
+    // OPTIONAL: DEMO SIMULATION
+    // For demonstration purposes, simulate occasional word detections
+    
+    function runDemo() {
+        if (Math.random() < 0.05 * (sensitivityLevel / 50)) {
+            // Randomly select a word
+            const randomWord = CORE_VOCABULARY[Math.floor(Math.random() * CORE_VOCABULARY.length)];
+            
+            // Pick a random detection method
+            const methods = ['binary', 'quantum', 'timing', 'system'];
+            const method = methods[Math.floor(Math.random() * methods.length)];
+            
+            // Generate random confidence level
+            const confidence = 0.6 + (Math.random() * 0.4);
+            
+            // Add detected word
+            addDetectedWord(randomWord, method, confidence);
+        }
+        
+        setTimeout(runDemo, 2000 + Math.random() * 5000);
+    }
+    
+    // Start demo after 5 seconds
+    setTimeout(runDemo, 5000);
+    </script>
+</body>
+</html>
