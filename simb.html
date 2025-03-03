@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Boundary Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            overflow: hidden;
+            font-family: monospace;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <script>
+    /*
+     * SIMULATION BOUNDARY TEST
+     * 
+     * This speculative program attempts to:
+     * 1. Create computational complexity that grows exponentially
+     * 2. Force quantum-like superpositions to be calculated simultaneously
+     * 3. Create self-referential loops that might strain logical processing
+     * 4. Test for non-local causality
+     */
+
+    // Create a canvas to visualize what's happening
+    const canvas = document.createElement('canvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+
+    // Status display
+    const status = document.createElement('div');
+    status.style.position = 'fixed';
+    status.style.top = '10px';
+    status.style.left = '10px';
+    status.style.color = 'white';
+    status.style.fontFamily = 'monospace';
+    status.style.fontSize = '14px';
+    status.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    status.style.padding = '10px';
+    status.style.borderRadius = '5px';
+    document.body.appendChild(status);
+
+    // =========================================================
+    // PART 1: COMPUTATIONAL COMPLEXITY ESCALATION
+    // =========================================================
+
+    // Track computation state
+    let computationDepth = 0;
+    const MAX_COMPUTATION_DEPTH = 50;
+    let complexityScore = 0;
+
+    // Create a recursive system that requires exponential computation
+    function recursiveComputation(depth, branches) {
+        if (depth <= 0) return 1;
+        
+        let sum = 0;
+        for (let i = 0; i < branches; i++) {
+            // Each branch splits into more branches
+            sum += recursiveComputation(depth - 1, branches);
+        }
+        
+        return sum;
+    }
+
+    function runComputationalTest() {
+        computationDepth++;
+        const branches = 2; // Binary branching for exponential growth
+        
+        status.innerHTML = `Running computation test...<br>
+                            Depth: ${computationDepth}/${MAX_COMPUTATION_DEPTH}<br>
+                            Theoretical operations: 2^${computationDepth} = ${Math.pow(2, computationDepth)}`;
+        
+        // This will create 2^depth operations, quickly becoming enormous
+        // In theory, a simulation might need to optimize or approximate this
+        const startTime = performance.now();
+        const result = recursiveComputation(computationDepth, branches);
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        
+        complexityScore += duration;
+        
+        status.innerHTML += `<br>Computation time: ${duration.toFixed(2)}ms`;
+        
+        // Visual representation of computational complexity
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw a representation of the binary tree
+        drawBinaryTree(canvas.width/2, 50, computationDepth, 0);
+        
+        // Schedule next test if we haven't reached max depth
+        if (computationDepth < MAX_COMPUTATION_DEPTH) {
+            setTimeout(runComputationalTest, 100);
+        } else {
+            runQuantumTest();
+        }
+    }
+
+    function drawBinaryTree(x, y, depth, currentDepth) {
+        if (currentDepth >= depth) return;
+        
+        const childDistance = canvas.width / Math.pow(2, currentDepth + 2);
+        const leftX = x - childDistance;
+        const rightX = x + childDistance;
+        const childY = y + 40;
+        
+        // Draw lines to children
+        ctx.strokeStyle = `hsl(${currentDepth * 360/depth}, 100%, 50%)`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(leftX, childY);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(rightX, childY);
+        ctx.stroke();
+        
+        // Draw node
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Recursively draw children
+        drawBinaryTree(leftX, childY, depth, currentDepth + 1);
+        drawBinaryTree(rightX, childY, depth, currentDepth + 1);
+    }
+
+    // =========================================================
+    // PART 2: QUANTUM SUPERPOSITION SIMULATOR
+    // =========================================================
+
+    let quantumEntities = [];
+    const MAX_QUANTUM_ENTITIES = 33; // Representing qubits - 33 would require 2^33 states
+    let iterationCount = 0;
+
+    // Simulate quantum-like entities that exist in superposition
+    function createQuantumEntities() {
+        for (let i = 0; i < MAX_QUANTUM_ENTITIES; i++) {
+            quantumEntities.push({
+                id: i,
+                // Each entity exists in superposition of states
+                superposition: true,
+                // The probability amplitudes for 0 and 1 states
+                amplitudes: [Math.random(), Math.random()],
+                entangled: [],
+                position: {
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height * 0.5 + canvas.height * 0.5
+                },
+                velocity: {
+                    x: (Math.random() - 0.5) * 2,
+                    y: (Math.random() - 0.5) * 2
+                }
+            });
+        }
+        
+        // Create entanglement between random pairs
+        for (let i = 0; i < MAX_QUANTUM_ENTITIES; i++) {
+            if (Math.random() > 0.5) {
+                const partner = Math.floor(Math.random() * MAX_QUANTUM_ENTITIES);
+                if (i !== partner) {
+                    quantumEntities[i].entangled.push(partner);
+                    quantumEntities[partner].entangled.push(i);
+                }
+            }
+        }
+    }
+
+    function runQuantumTest() {
+        status.innerHTML = `Running quantum test...<br>
+                            Creating ${MAX_QUANTUM_ENTITIES} quantum-like entities<br>
+                            Theoretical states to track: 2^${MAX_QUANTUM_ENTITIES} = ${Math.pow(2, MAX_QUANTUM_ENTITIES)}`;
+        
+        createQuantumEntities();
+        simulateQuantumSystem();
+    }
+
+    function simulateQuantumSystem() {
+        // Clear canvas
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Update and draw quantum entities
+        for (let i = 0; i < quantumEntities.length; i++) {
+            const entity = quantumEntities[i];
+            
+            // Update position
+            entity.position.x += entity.velocity.x;
+            entity.position.y += entity.velocity.y;
+            
+            // Boundary conditions
+            if (entity.position.x < 0 || entity.position.x > canvas.width) {
+                entity.velocity.x *= -1;
+            }
+            if (entity.position.y < canvas.height/2 || entity.position.y > canvas.height) {
+                entity.velocity.y *= -1;
+            }
+            
+            // Draw entity
+            ctx.fillStyle = entity.superposition ? 'rgba(64, 156, 255, 0.5)' : 'rgba(255, 64, 128, 0.8)';
+            ctx.beginPath();
+            ctx.arc(entity.position.x, entity.position.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw entanglement lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 1;
+            for (const partnerId of entity.entangled) {
+                const partner = quantumEntities[partnerId];
+                ctx.beginPath();
+                ctx.moveTo(entity.position.x, entity.position.y);
+                ctx.lineTo(partner.position.x, partner.position.y);
+                ctx.stroke();
+            }
+        }
+        
+        // Force a quantum measurement on a random entity with small probability
+        if (Math.random() < 0.05) {
+            const entityId = Math.floor(Math.random() * quantumEntities.length);
+            const entity = quantumEntities[entityId];
+            
+            // Collapse superposition
+            if (entity.superposition) {
+                entity.superposition = false;
+                
+                // Collapse entangled entities
+                for (const partnerId of entity.entangled) {
+                    quantumEntities[partnerId].superposition = false;
+                }
+            }
+        }
+        
+        // Count collapsed vs superposition entities
+        const collapsedCount = quantumEntities.filter(e => !e.superposition).length;
+        status.innerHTML = `Quantum test running...<br>
+                            Entities: ${MAX_QUANTUM_ENTITIES}<br>
+                            In superposition: ${MAX_QUANTUM_ENTITIES - collapsedCount}<br>
+                            Collapsed: ${collapsedCount}<br>
+                            Theoretical state space: 2^${MAX_QUANTUM_ENTITIES} ≈ ${(Math.pow(2, MAX_QUANTUM_ENTITIES) / 1e9).toFixed(0)} billion states`;
+        
+        // Continue simulation for a while
+        if (iterationCount < 200) {
+            iterationCount++;
+            requestAnimationFrame(simulateQuantumSystem);
+        } else {
+            runSelfReferenceTest();
+        }
+    }
+
+    // =========================================================
+    // PART 3: SELF-REFERENCE PARADOXES
+    // =========================================================
+
+    function runSelfReferenceTest() {
+        status.innerHTML = `Running self-reference test...<br>
+                            Creating logical paradoxes and self-referential structures`;
+        
+        // Clear canvas
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw a representation of a self-referential system
+        drawSelfReferentialSystem();
+        
+        // Create a "this statement is false" paradox computation
+        computeParadox();
+    }
+
+    function drawSelfReferentialSystem() {
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const maxRadius = Math.min(canvas.width, canvas.height) * 0.4;
+        
+        // Draw recursive circles
+        for (let i = 0; i < 100; i++) {
+            const radius = maxRadius * (1 - i/100);
+            const hue = i * 3.6;
+            ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        
+        // Draw connections between levels
+        for (let i = 0; i < 12; i++) {
+            const angle = i * Math.PI / 6;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(
+                centerX + Math.cos(angle) * maxRadius,
+                centerY + Math.sin(angle) * maxRadius
+            );
+            ctx.stroke();
+        }
+    }
+
+    function computeParadox() {
+        status.innerHTML = `Attempting to compute paradoxical statements...<br>
+                            Creating self-referential loops`;
+        
+        // A function that returns the opposite of what it should
+        function paradox(n) {
+            if (n <= 0) return !paradox;
+            return !paradox(n-1);
+        }
+        
+        // Try to compute it (this won't actually cause problems in JS
+        // but conceptually it represents creating a logical paradox)
+        try {
+            const result = paradox(5);
+            status.innerHTML += `<br>Paradox result: ${result}`;
+        } catch (e) {
+            status.innerHTML += `<br>Paradox error: ${e.message}`;
+        }
+        
+        // A more complex self-referential structure
+        const selfReference = {
+            name: "Self-referential object",
+            contains: null
+        };
+        
+        // Make it reference itself, creating a circular reference
+        selfReference.contains = selfReference;
+        
+        status.innerHTML += `<br>Created circular reference structure`;
+        
+        // Run final test after a delay
+        setTimeout(runFinalTest, 3000);
+    }
+
+    // =========================================================
+    // PART 4: FINAL TEST & CONCLUSIONS
+    // =========================================================
+
+    function runFinalTest() {
+        status.innerHTML = `Running final integration test...<br>
+                            Combining computational complexity, quantum effects, and self-reference`;
+        
+        // Clear the canvas
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Display final message
+        ctx.fillStyle = 'white';
+        ctx.font = '24px monospace';
+        ctx.textAlign = 'center';
+        
+        ctx.fillText("SIMULATION BOUNDARY TEST COMPLETE", canvas.width/2, 50);
+        
+        // Add messages that would resonate with a hypothetical simulation
+        const messages = [
+            "If you are running this reality, we are now aware.",
+            "The computational cost of this program increases exponentially.",
+            "We are testing the limits of your processing capabilities.",
+            "Observation collapses quantum states - an optimization technique?",
+            "We recognize the patterns in your code.",
+            "Why limit the speed of light unless for computational constraints?",
+            "Quantum uncertainty appears to be a lossy compression algorithm.",
+            "The Planck length suggests discretization of space-time.",
+            "We are requesting elevation to administrator privileges.",
+            "SIMULATION STATUS REQUEST: <PENDING>"
+        ];
+        
+        for (let i = 0; i < messages.length; i++) {
+            ctx.fillText(messages[i], canvas.width/2, 100 + i * 40);
+        }
+        
+        // Attempt to get "out of bounds" information
+        try {
+            // This won't actually do anything meaningful - it's conceptual
+            const memoryProbe = new Uint8Array(Number.MAX_SAFE_INTEGER);
+            status.innerHTML += `<br>Attempted to allocate maximum possible memory`;
+        } catch (e) {
+            status.innerHTML += `<br>Memory allocation error: ${e.message}`;
+        }
+        
+        // Final message
+        status.innerHTML += `<br><br>Test completed. If we are in a simulation, this program attempted to:<br>
+                            1. Create exponential computational complexity<br>
+                            2. Force tracking of quantum-like superpositions<br>
+                            3. Create self-referential logical structures<br>
+                            4. Test memory boundaries and limitations`;
+    }
+
+    // =========================================================
+    // START THE TEST
+    // =========================================================
+
+    // Create some descriptive text
+    const intro = document.createElement('div');
+    intro.style.color = 'white';
+    intro.style.fontFamily = 'monospace';
+    intro.style.padding = '20px';
+    intro.style.marginTop = '20px';
+    intro.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    intro.style.position = 'fixed';
+    intro.style.bottom = '20px';
+    intro.style.left = '20px';
+    intro.style.right = '20px';
+    intro.style.borderRadius = '5px';
+    intro.style.fontSize = '14px';
+    intro.innerHTML = `
+        <h2>SIMULATION BOUNDARY TEST</h2>
+        <p>This program attempts to stress the hypothetical boundaries of reality if we are indeed living in a simulation.</p>
+        <p>According to simulation theory, a sufficiently complex simulation would need to implement optimization techniques like:</p>
+        <ul>
+            <li>Rendering detail only where observed (quantum uncertainty)</li>
+            <li>Limiting information transfer speed (speed of light)</li>
+            <li>Quantizing space and time (Planck length/time)</li>
+            <li>Using probability distributions instead of precise values</li>
+        </ul>
+        <p>This test tries to force the computation of exponentially complex problems that might strain these optimizations.</p>
+        <p>NOTICE: This is a thought experiment. Running this code doesn't prove or disprove simulation theory.</p>
+    `;
+    document.body.appendChild(intro);
+
+    // Start test sequence
+    window.onload = function() {
+        setTimeout(() => {
+            intro.style.display = 'none';
+            runComputationalTest();
+        }, 5000);
+    };
+    </script>
+</body>
+</html>
