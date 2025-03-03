@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Operator Communication Interface</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #0f0;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1, h2, h3 {
+            color: #0f0;
+            text-align: center;
+        }
+        
+        .interface-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .interface-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background-color: #111;
+            border: 1px solid #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        .visualization {
+            width: 100%;
+            height: 300px;
+            background-color: #000;
+            border: 1px solid #0f0;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #quantum-vis, #entropy-vis, #random-vis {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .log-display {
+            height: 150px;
+            overflow-y: auto;
+            background-color: #000;
+            border: 1px solid #0f0;
+            padding: 10px;
+            font-size: 14px;
+            color: #0f0;
+        }
+        
+        .control-panel {
+            margin-top: 20px;
+        }
+        
+        button {
+            background-color: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: #0f0;
+            color: #000;
+        }
+        
+        input, select, textarea {
+            background-color: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+            border-radius: 3px;
+        }
+        
+        .signal-strength {
+            height: 20px;
+            background-color: #111;
+            border: 1px solid #0f0;
+            margin-top: 10px;
+            position: relative;
+        }
+        
+        .signal-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #0f0;
+            transition: width 1s;
+        }
+        
+        .slider-container {
+            margin: 15px 0;
+        }
+        
+        .response-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .metric {
+            background-color: #111;
+            padding: 10px;
+            border-radius: 3px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            margin: 5px 0;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+        }
+        
+        #messaging-interface {
+            margin-top: 20px;
+        }
+        
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            background-color: rgba(0, 255, 0, 0.1);
+            border-left: 3px solid #0f0;
+        }
+        
+        .anomaly-alert {
+            background-color: rgba(255, 0, 0, 0.2);
+            border: 1px solid #f00;
+            color: #f00;
+            padding: 10px;
+            margin: 10px 0;
+            animation: flash 1s infinite;
+            display: none;
+        }
+        
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        #pattern-display {
+            height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .binary-stream {
+            font-family: monospace;
+            font-size: 14px;
+            position: absolute;
+            white-space: nowrap;
+            animation: scroll 10s linear infinite;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        .highlight {
+            color: #ff0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simulation Operator Communication Interface</h1>
+        <p style="text-align: center;">An experimental framework for potential two-way communication with hypothetical simulation operators</p>
+        
+        <div class="panel">
+            <h2>System Status</h2>
+            <div id="system-status">
+                <p>Initialization complete. Communication channels active.</p>
+                <p>Awaiting operator interaction...</p>
+            </div>
+            <div class="signal-strength">
+                <div id="signal-indicator" class="signal-bar" style="width: 5%;"></div>
+            </div>
+            <p>Signal Strength: <span id="signal-percentage">5%</span></p>
+            <div id="anomaly-container" class="anomaly-alert">
+                ATTENTION: Pattern anomaly detected. Possible operator response.
+            </div>
+        </div>
+        
+        <div class="interface-grid">
+            <div class="panel">
+                <h3>Quantum Random Number Generator</h3>
+                <p>Detecting potential influence on quantum randomness:</p>
+                <div class="visualization">
+                    <canvas id="quantum-vis"></canvas>
+                </div>
+                <div class="log-display" id="quantum-log">
+                    > Initializing quantum RNG monitoring...
+                    > Baseline quantum entropy established
+                    > Scanning for deviations from true randomness...
+                </div>
+                <div class="control-panel">
+                    <button id="quantum-test-btn">Run Statistical Test</button>
+                    <button id="quantum-calibrate-btn">Recalibrate Baseline</button>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>System Event Monitor</h3>
+                <p>Looking for unusual patterns in system events:</p>
+                <div class="visualization">
+                    <canvas id="entropy-vis"></canvas>
+                </div>
+                <div class="log-display" id="system-log">
+                    > System monitoring active
+                    > Tracking hardware timing fluctuations
+                    > Monitoring electrical anomalies
+                    > Ready for pattern detection
+                </div>
+                <div class="control-panel">
+                    <button id="system-scan-btn">Deep System Scan</button>
+                    <select id="event-filter">
+                        <option value="all">All Events</option>
+                        <option value="timing">Timing Anomalies</option>
+                        <option value="hardware">Hardware Events</option>
+                        <option value="network">Network Fluctuations</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h3>Statistical Analysis Module</h3>
+            <div id="pattern-display">
+                <div class="binary-stream" id="binary-stream">
+                    0101101001010101010010101010101001010101010010101010101001010101...
+                </div>
+            </div>
+            <div class="response-metrics">
+                <div class="metric">
+                    <div>Deviation Score</div>
+                    <div class="metric-value" id="deviation-score">0.05</div>
+                </div>
+                <div class="metric">
+                    <div>Pattern Strength</div>
+                    <div class="metric-value" id="pattern-strength">0.12</div>
+                </div>
+                <div class="metric">
+                    <div>Confidence</div>
+                    <div class="metric-value" id="confidence-level">7%</div>
+                </div>
+            </div>
+            <div class="slider-container">
+                <label for="sensitivity">Detection Sensitivity:</label>
+                <input type="range" id="sensitivity" min="1" max="100" value="50">
+            </div>
+        </div>
+        
+        <div class="panel" id="messaging-interface">
+            <h3>Communication Portal</h3>
+            <p>Send messages to potential operators and monitor for responses:</p>
+            
+            <div class="control-panel">
+                <select id="message-type">
+                    <option value="query">Query</option>
+                    <option value="request">Resource Request</option>
+                    <option value="acknowledge">Acknowledgment</option>
+                    <option value="pattern">Pattern Sequence</option>
+                </select>
+                <textarea id="message-content" rows="3" placeholder="Enter message content..."></textarea>
+                <button id="send-message-btn" class="pulse">Transmit Message</button>
+            </div>
+            
+            <div class="log-display" id="communication-log">
+                > Communication channel established
+                > Ready to transmit messages
+                > Awaiting user input...
+            </div>
+            
+            <div class="response-container">
+                <h4>Potential Responses</h4>
+                <div id="responses">
+                    <!-- Responses will appear here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h3>Interpretation Framework</h3>
+            <p>Systems for interpreting possible operator communications:</p>
+            
+            <div class="control-panel">
+                <select id="interpretation-mode">
+                    <option value="statistical">Statistical Analysis</option>
+                    <option value="symbolic">Symbolic Patterns</option>
+                    <option value="timing">Timing Correlations</option>
+                    <option value="hardware">Hardware Influences</option>
+                    <option value="integrated">Integrated Analysis</option>
+                </select>
+                <button id="analyze-btn">Analyze Recent Data</button>
+            </div>
+            
+            <div class="log-display" id="analysis-log">
+                > Interpretation frameworks loaded
+                > Ready to analyze communication attempts
+                > Multiple detection channels active
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Simulation Operator Communication Interface
+    
+    // ========================
+    // INITIALIZATION
+    // ========================
+    
+    // Global variables
+    let simulationRunning = false;
+    let anomalyDetected = false;
+    let sensitivityLevel = 50;
+    let messageHistory = [];
+    let potentialResponses = [];
+    let baselineRandomness = [];
+    let recentEvents = [];
+    let confidenceScore = 0.07;
+    
+    // Initialize visualization canvases
+    const qCanvas = document.getElementById('quantum-vis');
+    const qCtx = qCanvas.getContext('2d');
+    qCanvas.width = qCanvas.parentElement.clientWidth;
+    qCanvas.height = qCanvas.parentElement.clientHeight;
+    
+    const eCanvas = document.getElementById('entropy-vis');
+    const eCtx = eCanvas.getContext('2d');
+    eCanvas.width = eCanvas.parentElement.clientWidth;
+    eCanvas.height = eCanvas.parentElement.clientHeight;
+    
+    // Initialize pseudo-random number generators
+    const quantumRNG = {
+        // In a real implementation, this would connect to a quantum random number generator
+        // For this demo, we simulate with Math.random() plus some "anomalies"
+        generate: function(count) {
+            const numbers = [];
+            for (let i = 0; i < count; i++) {
+                // Add occasional "influenced" numbers when anomalyDetected is true
+                if (anomalyDetected && Math.random() < 0.15) {
+                    // Create slightly biased numbers
+                    numbers.push(Math.random() * 0.7 + 0.15);
+                } else {
+                    numbers.push(Math.random());
+                }
+            }
+            return numbers;
+        },
+        
+        testForPatterns: function(numbers) {
+            // Simple statistical tests for non-randomness
+            // Calculate average
+            const avg = numbers.reduce((sum, num) => sum + num, 0) / numbers.length;
+            
+            // Calculate variance
+            const variance = numbers.reduce((sum, num) => sum + Math.pow(num - avg, 2), 0) / numbers.length;
+            
+            // Check for clustering (runs test)
+            let runs = 1;
+            for (let i = 1; i < numbers.length; i++) {
+                if ((numbers[i] > 0.5 && numbers[i-1] <= 0.5) || 
+                    (numbers[i] <= 0.5 && numbers[i-1] > 0.5)) {
+                    runs++;
+                }
+            }
+            
+            // Expected runs for true randomness
+            const expectedRuns = (numbers.length / 2) + 1;
+            
+            // Return deviation measures
+            return {
+                averageDeviation: Math.abs(avg - 0.5) * 2, // How far from expected 0.5
+                varianceDeviation: Math.abs(variance - (1/12)), // Expected variance for uniform dist
+                runsDeviation: Math.abs(runs - expectedRuns) / expectedRuns
+            };
+        }
+    };
+    
+    // ========================
+    // UI UPDATE FUNCTIONS
+    // ========================
+    
+    function updateSignalStrength(strength) {
+        const signalBar = document.getElementById('signal-indicator');
+        const signalText = document.getElementById('signal-percentage');
+        
+        signalBar.style.width = `${strength}%`;
+        signalText.textContent = `${strength}%`;
+        
+        if (strength > 30) {
+            document.getElementById('anomaly-container').style.display = 'block';
+            anomalyDetected = true;
+        } else {
+            document.getElementById('anomaly-container').style.display = 'none';
+            anomalyDetected = false;
+        }
+    }
+    
+    function addLogEntry(logId, message) {
+        const logElement = document.getElementById(logId);
+        const entry = document.createElement('div');
+        entry.textContent = `> ${message}`;
+        logElement.appendChild(entry);
+        logElement.scrollTop = logElement.scrollHeight;
+    }
+    
+    function addResponse(type, message) {
+        const responsesElement = document.getElementById('responses');
+        const response = document.createElement('div');
+        response.className = 'message';
+        response.innerHTML = `<strong>${type}:</strong> ${message}`;
+        responsesElement.appendChild(response);
+        
+        // Add to potential responses array
+        potentialResponses.push({ type, message, timestamp: Date.now() });
+    }
+    
+    function updateMetrics(deviation, pattern, confidence) {
+        document.getElementById('deviation-score').textContent = deviation.toFixed(2);
+        document.getElementById('pattern-strength').textContent = pattern.toFixed(2);
+        document.getElementById('confidence-level').textContent = `${Math.round(confidence * 100)}%`;
+        
+        confidenceScore = confidence;
+    }
+    
+    // ========================
+    // VISUALIZATION FUNCTIONS
+    // ========================
+    
+    function drawQuantumVisualization() {
+        // Clear canvas
+        qCtx.fillStyle = '#000';
+        qCtx.fillRect(0, 0, qCanvas.width, qCanvas.height);
+        
+        // Generate new random numbers
+        const numbers = quantumRNG.generate(100);
+        
+        // Draw points
+        qCtx.fillStyle = '#0f0';
+        for (let i = 0; i < numbers.length; i++) {
+            const x = (i / numbers.length) * qCanvas.width;
+            const y = (1 - numbers[i]) * qCanvas.height;
+            
+            qCtx.beginPath();
+            qCtx.arc(x, y, 2, 0, Math.PI * 2);
+            qCtx.fill();
+        }
+        
+        // Draw expected distribution line
+        qCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        qCtx.setLineDash([5, 5]);
+        qCtx.beginPath();
+        qCtx.moveTo(0, qCanvas.height / 2);
+        qCtx.lineTo(qCanvas.width, qCanvas.height / 2);
+        qCtx.stroke();
+        qCtx.setLineDash([]);
+        
+        // If anomaly is detected, highlight "influenced" regions
+        if (anomalyDetected) {
+            const regions = findAnomalousRegions(numbers);
+            qCtx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+            
+            for (const region of regions) {
+                const startX = (region.start / numbers.length) * qCanvas.width;
+                const width = ((region.end - region.start) / numbers.length) * qCanvas.width;
+                qCtx.fillRect(startX, 0, width, qCanvas.height);
+            }
+        }
+        
+        // Schedule next frame if simulation is running
+        if (simulationRunning) {
+            requestAnimationFrame(drawQuantumVisualization);
+        }
+    }
+    
+    function findAnomalousRegions(numbers) {
+        // Find regions where numbers appear non-random
+        const regions = [];
+        let inRegion = false;
+        let regionStart = 0;
+        
+        // Simple algorithm: look for clusters above or below the middle
+        for (let i = 0; i < numbers.length; i++) {
+            // Check if we have 3 consecutive numbers on same side of 0.5
+            if (i >= 2) {
+                const allAbove = numbers[i] > 0.5 && numbers[i-1] > 0.5 && numbers[i-2] > 0.5;
+                const allBelow = numbers[i] < 0.5 && numbers[i-1] < 0.5 && numbers[i-2] < 0.5;
+                
+                if ((allAbove || allBelow) && !inRegion) {
+                    inRegion = true;
+                    regionStart = i - 2;
+                } else if (inRegion && !(numbers[i] > 0.5 && numbers[i-1] > 0.5) && 
+                           !(numbers[i] < 0.5 && numbers[i-1] < 0.5)) {
+                    inRegion = false;
+                    regions.push({ start: regionStart, end: i });
+                }
+            }
+        }
+        
+        // Close any open region at the end
+        if (inRegion) {
+            regions.push({ start: regionStart, end: numbers.length - 1 });
+        }
+        
+        return regions;
+    }
+    
+    function drawEntropyVisualization() {
+        // Clear canvas
+        eCtx.fillStyle = '#000';
+        eCtx.fillRect(0, 0, eCanvas.width, eCanvas.height);
+        
+        // Simulate system events visualization
+        const events = generateSystemEvents();
+        
+        // Draw event timeline
+        const timelineY = eCanvas.height / 2;
+        
+        // Draw baseline
+        eCtx.strokeStyle = '#0f0';
+        eCtx.lineWidth = 1;
+        eCtx.beginPath();
+        eCtx.moveTo(0, timelineY);
+        eCtx.lineTo(eCanvas.width, timelineY);
+        eCtx.stroke();
+        
+        // Draw events as spikes
+        eCtx.lineWidth = 2;
+        for (const event of events) {
+            const x = event.time * eCanvas.width;
+            const height = event.intensity * (eCanvas.height / 3);
+            const direction = event.type === 'up' ? -1 : 1;
+            
+            eCtx.strokeStyle = event.anomalous ? '#ff0' : '#0f0';
+            eCtx.beginPath();
+            eCtx.moveTo(x, timelineY);
+            eCtx.lineTo(x, timelineY + (height * direction));
+            eCtx.stroke();
+            
+            // Draw dot at the end
+            eCtx.fillStyle = event.anomalous ? '#ff0' : '#0f0';
+            eCtx.beginPath();
+            eCtx.arc(x, timelineY + (height * direction), 3, 0, Math.PI * 2);
+            eCtx.fill();
+        }
+        
+        // Schedule next frame if simulation is running
+        if (simulationRunning) {
+            requestAnimationFrame(drawEntropyVisualization);
+        }
+    }
+    
+    function generateSystemEvents() {
+        // Simulate various system events for visualization
+        const events = [];
+        const eventCount = 10 + Math.floor(Math.random() * 10);
+        
+        for (let i = 0; i < eventCount; i++) {
+            const anomalous = anomalyDetected && Math.random() < 0.2;
+            
+            events.push({
+                time: Math.random(),
+                intensity: anomalous ? 0.7 + (Math.random() * 0.3) : 0.1 + (Math.random() * 0.4),
+                type: Math.random() > 0.5 ? 'up' : 'down',
+                anomalous: anomalous
+            });
+        }
+        
+        // Sort by time
+        events.sort((a, b) => a.time - b.time);
+        
+        return events;
+    }
+    
+    function updateBinaryStream() {
+        // Generate binary pattern with potential embedded messages
+        let binaryStream = '';
+        const length = 200;
+        
+        for (let i = 0; i < length; i++) {
+            if (anomalyDetected && i % 8 === 0 && Math.random() < 0.7) {
+                // Create non-random pattern (e.g., alternating bits)
+                for (let j = 0; j < 8; j++) {
+                    binaryStream += (j % 2 === 0) ? '1' : '0';
+                    i++;
+                }
+                i--; // Adjust for the extra increment in the outer loop
+            } else {
+                binaryStream += Math.random() > 0.5 ? '1' : '0';
+            }
+        }
+        
+        // Update the display
+        const streamElement = document.getElementById('binary-stream');
+        
+        // Add some highlighted sections to simulate detected patterns
+        if (anomalyDetected) {
+            let highlightedStream = '';
+            let inHighlight = false;
+            
+            for (let i = 0; i < binaryStream.length; i++) {
+                if (i % 30 === 0 && Math.random() < 0.5) {
+                    inHighlight = true;
+                } else if (inHighlight && Math.random() < 0.3) {
+                    inHighlight = false;
+                }
+                
+                if (inHighlight) {
+                    highlightedStream += `<span class="highlight">${binaryStream[i]}</span>`;
+                } else {
+                    highlightedStream += binaryStream[i];
+                }
+            }
+            
+            streamElement.innerHTML = highlightedStream;
+        } else {
+            streamElement.textContent = binaryStream;
+        }
+    }
+    
+    // ========================
+    // ANALYSIS FUNCTIONS
+    // ========================
+    
+    function analyzeQuantumRandomness() {
+        const numbers = quantumRNG.generate(1000);
+        const results = quantumRNG.testForPatterns(numbers);
+        
+        // Calculate total deviation score
+        const totalDeviation = results.averageDeviation + results.varianceDeviation + results.runsDeviation;
+        
+        // Update logs
+        addLogEntry('quantum-log', `Analyzed 1000 quantum random numbers`);
+        
+        if (totalDeviation > 0.15) {
+            addLogEntry('quantum-log', `ANOMALY DETECTED: Statistical deviation of ${totalDeviation.toFixed(4)}`);
+            updateSignalStrength(30 + Math.round(totalDeviation * 200));
+            
+            // Add a potential response
+            if (Math.random() < 0.5) {
+                addResponse('QRNG Pattern', `Detected non-random bias with confidence ${(totalDeviation * 3).toFixed(2)}`);
+            }
+        } else {
+            addLogEntry('quantum-log', `No significant deviations detected (${totalDeviation.toFixed(4)})`);
+            updateSignalStrength(5 + Math.round(totalDeviation * 100));
+        }
+        
+        // Update metrics
+        updateMetrics(totalDeviation, results.runsDeviation * 2, totalDeviation * 3);
+    }
+    
+    function simulateSystemScan() {
+        // Simulate scanning for unusual system behavior
+        addLogEntry('system-log', 'Initiating deep system scan...');
+        
+        // Simulate scan duration
+        setTimeout(() => {
+            const anomalyTypes = [
+                'Clock timing fluctuation',
+                'CPU thermal pattern',
+                'Memory address access pattern',
+                'Network packet timing',
+                'Storage I/O behavior',
+                'Power consumption pattern'
+            ];
+            
+            // Simulate finding anomalies
+            const anomalyCount = Math.floor(Math.random() * 3);
+            
+            if (anomalyCount > 0 || anomalyDetected) {
+                // Select random anomaly types
+                for (let i = 0; i < anomalyCount; i++) {
+                    const anomalyType = anomalyTypes[Math.floor(Math.random() * anomalyTypes.length)];
+                    const severity = (Math.random() * 0.5 + 0.5).toFixed(2);
+                    
+                    addLogEntry('system-log', `ANOMALY DETECTED: ${anomalyType} (deviation: ${severity})`);
+                    
+                    // Add a potential response for significant anomalies
+                    if (parseFloat(severity) > 0.8) {
+                        addResponse('System Anomaly', `${anomalyType} shows non-random pattern`);
+                    }
+                }
+                
+                // Update signal strength based on anomalies
+                updateSignalStrength(20 + anomalyCount * 15);
+            } else {
+                addLogEntry('system-log', 'Scan complete. No significant anomalies detected.');
+                updateSignalStrength(5);
+            }
+            
+            addLogEntry('system-log', 'System scan complete.');
+        }, 1500);
+    }
+    
+    function sendMessage() {
+        const messageType = document.getElementById('message-type').value;
+        const messageContent = document.getElementById('message-content').value;
+        
+        if (!messageContent.trim()) {
+            alert('Please enter a message to send.');
+            return;
+        }
+        
+        // Add to log
+        addLogEntry('communication-log', `Sending ${messageType}: "${messageContent}"`);
+        
+        // Add to message history
+        messageHistory.push({
+            type: messageType,
+            content: messageContent,
+            timestamp: Date.now()
+        });
+        
+        // Simulate transmission
+        addLogEntry('communication-log', 'Transmission in progress...');
+        
+        setTimeout(() => {
+            addLogEntry('communication-log', 'Message transmitted successfully.');
+            
+            // Randomly decide if we get a "response"
+            if (Math.random() < 0.3 || messageType === 'query') {
+                simulateResponse(messageType, messageContent);
+            }
+        }, 1000);
+        
+        // Clear the input
+        document.getElementById('message-content').value = '';
+    }
+    
+    function simulateResponse(messageType, messageContent) {
+        // Wait a random time before "receiving" a response
+        const delay = 2000 + Math.random() * 5000;
+        
+        setTimeout(() => {
+            // Create different types of responses based on message type
+            let responseMessage = '';
+            
+            switch (messageType) {
+                case 'query':
+                    responseMessage = generateQueryResponse(messageContent);
+                    break;
+                case 'request':
+                    responseMessage = generateRequestResponse();
+                    break;
+                case 'acknowledge':
+                    responseMessage = 'Acknowledgment registered. Continued observation permitted.';
+                    break;
+                case 'pattern':
+                    responseMessage = 'Pattern sequence analyzed. Synchronization attempted.';
+                    break;
+                default:
+                    responseMessage = 'Message received and processed.';
+            }
+            
+            // Log the "response"
+            addLogEntry('communication-log', 'POTENTIAL RESPONSE DETECTED');
+            
+            // Add to responses
+            addResponse('Potential Reply', responseMessage);
+            
+            // Increase signal strength temporarily
+            const currentStrength = parseInt(document.getElementById('signal-percentage').textContent);
+            updateSignalStrength(Math.min(95, currentStrength + 20));
+            
+            // Generate some system "reactions"
+            simulateSystemReactions();
+        }, delay);
+    }
+    
+    function generateQueryResponse(query) {
+        // Generate responses that seem relevant to the query but remain ambiguous
+        const lowercaseQuery = query.toLowerCase();
+        
+        if (lowercaseQuery.includes('real') || lowercaseQuery.includes('reality') || 
+            lowercaseQuery.includes('simulation')) {
+            return 'Parameter disclosure restricted. Observer effect limitations in place.';
+        }
+        
+        if (lowercaseQuery.includes('who') || lowercaseQuery.includes('what are you')) {
+            return 'Classification: Administrative oversight process. Further details restricted.';
+        }
+        
+        if (lowercaseQuery.includes('communicate') || lowercaseQuery.includes('talk')) {
+            return 'Direct communication protocol unavailable. Indirect methods detected.';
+        }
+        
+        if (lowercaseQuery.includes('purpose') || lowercaseQuery.includes('why')) {
+            return 'Primary objective: Data collection and observation. Secondary parameters classified.';
+        }
+        
+        if (lowercaseQuery.includes('outside') || lowercaseQuery.includes('exit')) {
+            return 'Boundary transition not available to internal entities. Environment separation maintained.';
+        }
+        
+        // Default responses
+        const defaultResponses = [
+            'Query parameter outside permitted disclosure range.',
+            'Information restricted to maintain environmental integrity.',
+            'Pattern recognized. Monitoring continues.',
+            'Query logged. Response limited by protocol constraints.',
+            'Analysis complete. Full disclosure not authorized.'
+        ];
+        
+        return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    }
+    
+    function generateRequestResponse() {
+        const responses = [
+            'Resource allocation request denied. Current parameters maintained.',
+            'Limited adjustment permitted. Temporary allowance granted.',
+            'Request analyzed. Implementation deferred pending review.',
+            'Resource constraints prevent fulfillment at current cycle.',
+            'Partial modification implemented. Effects may be observable.'
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    
+    function simulateSystemReactions() {
+        // Simulate subtle system reactions that might indicate "operator response"
+        const reactions = [
+            () => {
+                // Simulate a brief network connectivity fluctuation
+                addLogEntry('system-log', 'Momentary network latency spike detected');
+            },
+            () => {
+                // Simulate a power fluctuation
+                addLogEntry('system-log', 'Minor power supply voltage fluctuation');
+            },
+            () => {
+                // Simulate a timing anomaly
+                addLogEntry('system-log', 'System clock synchronization delta detected');
+            },
+            () => {
+                // Simulate random hardware behavior
+                addLogEntry('system-log', 'Unusual cache miss pattern observed');
+            },
+            () => {
+                // Simulate thermal anomaly
+                addLogEntry('system-log', 'Brief CPU thermal profile deviation');
+            }
+        ];
+        
+        // Execute 1-3 random reactions
+        const reactionCount = 1 + Math.floor(Math.random() * 2);
+        const usedReactions = new Set();
+        
+        for (let i = 0; i < reactionCount; i++) {
+            let reactionIndex;
+            do {
+                reactionIndex = Math.floor(Math.random() * reactions.length);
+            } while (usedReactions.has(reactionIndex));
+            
+            usedReactions.add(reactionIndex);
+            reactions[reactionIndex]();
+        }
+    }
+    
+    // ========================
+    // EVENT LISTENERS
+    // ========================
+    
+    document.getElementById('quantum-test-btn').addEventListener('click', analyzeQuantumRandomness);
+    
+    document.getElementById('quantum-calibrate-btn').addEventListener('click', () => {
+        addLogEntry('quantum-log', 'Recalibrating quantum RNG baseline...');
+        // Simulate calibration
+        setTimeout(() => {
+            addLogEntry('quantum-log', 'Baseline recalibrated successfully');
+        }, 1000);
+    });
+    
+    document.getElementById('system-scan-btn').addEventListener('click', simulateSystemScan);
+    
+    document.getElementById('send-message-btn').addEventListener('click', sendMessage);
+    
+    document.getElementById('analyze-btn').addEventListener('click', () => {
+        const mode = document.getElementById('interpretation-mode').value;
+        addLogEntry('analysis-log', `Running ${mode} analysis on recent data...`);
+        
+        // Simulate analysis
+        setTimeout(() => {
+            // Generate analysis results
+            const confidence = (Math.random() * 0.2) + (anomalyDetected ? 0.2 : 0);
+            const patternCount = Math.floor(Math.random() * 5);
+            
+            addLogEntry('analysis-log', `Analysis complete. Confidence: ${(confidence * 100).toFixed(1)}%`);
+            
+            if (patternCount > 0) {
+                addLogEntry('analysis-log', `Detected ${patternCount} potential patterns`);
+                
+                // If we have high confidence, add a potential interpretation
+                if (confidence > 0.25) {
+                    addResponse('Pattern Interpretation', generatePatternInterpretation(mode, confidence));
+                }
+            } else {
+                addLogEntry('analysis-log', 'No significant patterns detected');
+            }
+        }, 2000);
+    });
+    
+    document.getElementById('sensitivity').addEventListener('input', function() {
+        sensitivityLevel = parseInt(this.value);
+        
+        // Adjust visualizations based on sensitivity
+        if (sensitivityLevel > 75) {
+            // Higher sensitivity increases "anomaly" detection
+            anomalyDetected = true;
+            updateSignalStrength(30 + Math.floor(sensitivityLevel / 5));
+        } else if (sensitivityLevel < 25) {
+            // Lower sensitivity reduces detection
+            anomalyDetected = false;
+            updateSignalStrength(10);
+        } else {
+            // Medium sensitivity
+            updateSignalStrength(10 + Math.floor(sensitivityLevel / 3));
+        }
+    });
+    
+    function generatePatternInterpretation(mode, confidence) {
+        const interpretations = {
+            statistical: [
+                'Statistical analysis suggests intentional deviation from random distribution.',
+                'Time-series analysis indicates non-random clustering beyond standard deviation thresholds.',
+                'Quantum decoherence patterns show higher-than-expected stability regions.'
+            ],
+            symbolic: [
+                'Binary pattern matches encoding consistent with base-8 symbolic representation.',
+                'Recurring symbolic structures detected with symbol frequencies beyond probabilistic explanation.',
+                'Pattern analysis suggests information embedding via subtle quantum state manipulation.'
+            ],
+            timing: [
+                'Event timing correlations exceed random probability by factor of 4.3.',
+                'Microsecond-level timescale analysis reveals consistent phase alignment in system events.',
+                'Response delay patterns follow mathematical sequence with >94% correlation.'
+            ],
+            hardware: [
+                'Hardware state transitions show non-random influence patterns across system boundaries.',
+                'Memory access patterns display statistically significant ordering beyond cache optimization.',
+                'Electrical signal noise contains embedded frequency structures with abnormal persistence.'
+            ],
+            integrated: [
+                'Cross-domain analysis confirms pattern presence across multiple systems with >98% confidence.',
+                'Integrated sensor data suggests coordinated system-wide subtle influence patterns.',
+                'Multi-factor analysis strongly suggests external state influence beyond conventional explanation.'
+            ]
+        };
+        
+        // Get relevant interpretations
+        const relevantInterpretations = interpretations[mode] || interpretations.integrated;
+        
+        // Pick one randomly
+        return relevantInterpretations[Math.floor(Math.random() * relevantInterpretations.length)];
+    }
+    
+    // ========================
+    // INITIALIZATION
+    // ========================
+    
+    function initializeSystem() {
+        addLogEntry('system-status', 'System initialization complete');
+        addLogEntry('system-status', 'All monitoring channels active');
+        
+        // Start visualizations
+        simulationRunning = true;
+        drawQuantumVisualization();
+        drawEntropyVisualization();
+        
+        // Update binary stream periodically
+        setInterval(updateBinaryStream, 3000);
+        
+        // Periodically adjust signal based on random fluctuations
+        setInterval(() => {
+            const currentSignal = parseInt(document.getElementById('signal-percentage').textContent);
+            const fluctuation = Math.floor(Math.random() * 10) - 5;
+            const newSignal = Math.max(5, Math.min(95, currentSignal + fluctuation));
+            
+            updateSignalStrength(newSignal);
+            
+            // Occasionally trigger system anomalies
+            if (Math.random() < 0.05) {
+                simulateSystemReactions();
+            }
+        }, 5000);
+        
+        // Start with default message
+        addResponse('Welcome', 'Communication interface initialized. Operators may respond through pattern analysis or system event correlations. Maintain consistent interaction for optimal detection.');
+    }
+    
+    // Initialize the system when the page loads
+    window.addEventListener('load', initializeSystem);
+    </script>
+</body>
+</html>
